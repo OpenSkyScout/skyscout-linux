@@ -92,6 +92,9 @@ struct s3c2410fb_mach_info {
 
 	/* lpc3600 control register */
 	unsigned long	lpcsel;
+
+	/* Board-specific STN LCDCON4 bits outside fb_var timing data */
+	unsigned long	lcdcon4_extra;
 };
 
 extern void s3c24xx_fb_set_platdata(struct s3c2410fb_mach_info *);

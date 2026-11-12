@@ -247,6 +247,8 @@ static void s3c2410fb_calculate_stn_lcd_regs(const struct fb_info *info,
 					     struct s3c2410fb_hw *regs)
 {
 	const struct s3c2410fb_info *fbi = info->par;
+	const struct s3c2410fb_mach_info *mach_info =
+		dev_get_platdata(fbi->dev);
 	const struct fb_var_screeninfo *var = &info->var;
 	int type = regs->lcdcon1 & ~S3C2410_LCDCON1_TFT;
 	int hs = var->xres >> 2;
@@ -297,6 +299,9 @@ static void s3c2410fb_calculate_stn_lcd_regs(const struct fb_info *info,
 			S3C2410_LCDCON3_HOZVAL(hs - 1);
 
 	regs->lcdcon4 = S3C2410_LCDCON4_WLH(wlh);
+
+	/* Preserve board-specific STN bits not represented by fb_var timing. */
+	regs->lcdcon4 |= mach_info->lcdcon4_extra;
 }
 
 /* s3c2410fb_calculate_tft_lcd_regs
