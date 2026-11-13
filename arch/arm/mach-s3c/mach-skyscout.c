@@ -10,7 +10,9 @@
 #include <linux/init.h>
 #include <linux/io.h>
 #include <linux/irqchip.h>
+#include <linux/irqdomain.h>
 #include <linux/mmc/host.h>
+#include <linux/of.h>
 #include <linux/platform_device.h>
 
 #include <linux/platform_data/fb-s3c2410.h>
@@ -142,6 +144,42 @@ static struct platform_device *skyscout_devices[] __initdata = {
 	&s3c_device_sdi,
 };
 
+static void __init skyscout_map_legacy_irq(struct platform_device *pdev,
+					   irq_hw_number_t hwirq)
+{
+	struct device_node *np;
+	struct irq_domain *domain;
+	struct resource *resource;
+	unsigned int irq;
+
+	/*
+	 * The LCD and SDI drivers still use legacy platform devices, while the
+	 * interrupt controller is initialized from DT and therefore allocates
+	 * Linux IRQ numbers dynamically.  Replace the old fixed IRQ resources
+	 * with mappings from the controller's hardware IRQ numbers.
+	 */
+	np = of_find_compatible_node(NULL, NULL, "samsung,s3c2410-irq");
+	if (!np)
+		panic("SkyScout: interrupt controller node is missing\n");
+
+	domain = irq_find_host(np);
+	of_node_put(np);
+	if (!domain)
+		panic("SkyScout: interrupt domain is unavailable\n");
+
+	irq = irq_create_mapping(domain, hwirq);
+	if (!irq)
+		panic("SkyScout: cannot map hardware IRQ %lu\n",
+		      (unsigned long)hwirq);
+
+	resource = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
+	if (!resource)
+		panic("SkyScout: %s has no IRQ resource\n", pdev->name);
+
+	resource->start = irq;
+	resource->end = irq;
+}
+
 static void __init skyscout_map_io(void)
 {
 	s3c24xx_init_io(NULL, 0);
@@ -154,6 +192,8 @@ static void __init skyscout_machine_init(void)
 	s3c24xx_mci_set_platdata(&skyscout_mci_pdata);
 	gpiod_add_lookup_table(&skyscout_mmc_gpio_table);
 
+	skyscout_map_legacy_irq(&s3c_device_lcd, 16);
+	skyscout_map_legacy_irq(&s3c_device_sdi, 21);
 	platform_add_devices(skyscout_devices, ARRAY_SIZE(skyscout_devices));
 	s3c_pm_init();
 }
