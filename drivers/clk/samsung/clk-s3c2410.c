@@ -323,6 +323,7 @@ void __init s3c2410_common_clk_init(struct device_node *np, unsigned long xti_f,
 				    void __iomem *base)
 {
 	struct samsung_clk_provider *ctx;
+	struct clk *xti;
 	struct clk_hw **hws;
 	reg_base = base;
 
@@ -335,9 +336,21 @@ void __init s3c2410_common_clk_init(struct device_node *np, unsigned long xti_f,
 	ctx = samsung_clk_init(np, reg_base, NR_CLKS);
 	hws = ctx->clk_data.hws;
 
-	/* Register external clocks only in non-dt cases */
-	if (!np)
+	/* Register external clocks only in non-dt cases. */
+	if (!np) {
 		s3c2410_common_clk_register_fixed_ext(ctx, xti_f);
+	} else {
+		/*
+		 * The binding supplies XTI as a standard fixed clock whose
+		 * clock-output-names value is "xti".  Keep it in the onecell
+		 * table too: the rate-table selection below and consumers of
+		 * the XTI clock ID both require a valid clk_hw here.
+		 */
+		xti = __clk_lookup("xti");
+		if (!xti)
+			panic("%s: failed to find xti clock\n", __func__);
+		hws[XTI] = __clk_get_hw(xti);
+	}
 
 	if (current_soc == S3C2410) {
 		if (clk_hw_get_rate(hws[XTI]) == 12 * MHZ) {
