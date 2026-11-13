@@ -21,7 +21,7 @@
 
 	chosen {
 		stdout-path = "serial0:9600n8";
-		bootargs = "earlycon console=ttySAC0,9600n8 console=tty0 root=/dev/mmcblk0p2 rootwait ro";
+		bootargs = "earlycon keep_bootcon console=ttySAC0,9600n8 console=tty0 root=/dev/mmcblk0p2 rootwait ro";
 	};
 
 	cpus {
