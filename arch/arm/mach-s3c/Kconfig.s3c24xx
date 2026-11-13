@@ -265,6 +265,17 @@ config MACH_QT2410
 	help
 	  Say Y here if you are using the Armzone QT2410
 
+config MACH_SKYSCOUT
+	bool "Celestron SkyScout"
+	select PINCTRL
+	select PINCTRL_S3C24XX
+	select TIMER_OF
+	select USE_OF
+	help
+	  Say Y here to enable support for the Celestron SkyScout handheld
+	  planetarium.  The board uses a device tree for the S3C2410 core
+	  peripherals and legacy platform data for its LCD and SD interface.
+
 config ARCH_SMDK2410
 	bool "SMDK2410/A9M2410"
 	select S3C24XX_SMDK

@@ -1,0 +1,317 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Celestron SkyScout handheld planetarium
+ */
+
+/dts-v1/;
+
+#include <dt-bindings/clock/s3c2410.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include "s3c24xx.dtsi"
+#include "s3c2410-pinctrl.h"
+
+/ {
+	model = "Celestron SkyScout";
+	compatible = "celestron,skyscout", "samsung,s3c2410";
+
+	aliases {
+		serial0 = &uart_0;
+	};
+
+	chosen {
+		stdout-path = "serial0:9600n8";
+		bootargs = "earlycon console=ttySAC0,9600n8 console=tty0 root=/dev/mmcblk0p2 rootwait ro";
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu@0 {
+			device_type = "cpu";
+			compatible = "arm,arm920t";
+			reg = <0>;
+		};
+	};
+
+	memory@30000000 {
+		device_type = "memory";
+		reg = <0x30000000 0x00800000>;
+	};
+
+	xti: clock-0 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <12000000>;
+		clock-output-names = "xti";
+	};
+
+	clocks: clock-controller@4c000000 {
+		compatible = "samsung,s3c2410-clock";
+		reg = <0x4c000000 0x20>;
+		#clock-cells = <1>;
+	};
+
+	gpio_keys: gpio-keys-polled {
+		compatible = "gpio-keys-polled";
+		label = "SkyScout front panel";
+		poll-interval = <10>;
+
+		key-volume-down {
+			label = "Volume Down";
+			linux,code = <KEY_VOLUMEDOWN>;
+			gpios = <&gpf 0 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-volume-up {
+			label = "Volume Up";
+			linux,code = <KEY_VOLUMEUP>;
+			gpios = <&gpf 1 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-brightness-down {
+			label = "Brightness Down";
+			linux,code = <KEY_BRIGHTNESSDOWN>;
+			gpios = <&gpf 2 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-brightness-up {
+			label = "Brightness Up";
+			linux,code = <KEY_BRIGHTNESSUP>;
+			gpios = <&gpf 3 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-identify {
+			label = "Identify";
+			linux,code = <KEY_PROG1>;
+			gpios = <&gpf 7 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-locate {
+			label = "Locate";
+			linux,code = <KEY_PROG2>;
+			gpios = <&gpg 0 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-gps {
+			label = "GPS";
+			linux,code = <KEY_PROG3>;
+			gpios = <&gpg 1 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-menu {
+			label = "Menu";
+			linux,code = <KEY_MENU>;
+			gpios = <&gpg 8 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-help {
+			label = "Help";
+			linux,code = <KEY_HELP>;
+			gpios = <&gpg 9 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-power {
+			label = "Power";
+			linux,code = <KEY_POWER>;
+			gpios = <&gpb 4 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-target {
+			label = "Target";
+			linux,code = <KEY_PROG4>;
+			gpios = <&gpg 10 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-up {
+			label = "Up";
+			linux,code = <KEY_UP>;
+			gpios = <&gpg 12 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-back {
+			label = "Back";
+			linux,code = <KEY_BACK>;
+			gpios = <&gpg 13 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-select {
+			label = "Select";
+			linux,code = <KEY_ENTER>;
+			gpios = <&gpg 14 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+
+		key-down {
+			label = "Down";
+			linux,code = <KEY_DOWN>;
+			gpios = <&gpg 15 GPIO_ACTIVE_LOW>;
+			debounce-interval = <20>;
+		};
+	};
+
+	nand: nand-controller@4e000000 {
+		compatible = "samsung,s3c2410-nand";
+		reg = <0x4e000000 0x40>;
+		clocks = <&clocks HCLK_NAND>;
+		clock-names = "nand";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		nand@0 {
+			reg = <0>;
+			nand-ecc-mode = "none";
+
+			partitions {
+				compatible = "fixed-partitions";
+				#address-cells = <1>;
+				#size-cells = <1>;
+
+				partition@0 {
+					label = "bootloader";
+					reg = <0x0000000 0x0004000>;
+					read-only;
+				};
+
+				partition@4000 {
+					label = "firmware-code";
+					reg = <0x0004000 0x00b8000>;
+					read-only;
+				};
+
+				partition@bc000 {
+					label = "firmware-data";
+					reg = <0x00bc000 0x0004000>;
+					read-only;
+				};
+
+				partition@c0000 {
+					label = "factory-nvdata";
+					reg = <0x00c0000 0x0004000>;
+					read-only;
+				};
+
+				partition@c4000 {
+					label = "reserved";
+					reg = <0x00c4000 0x0004000>;
+					read-only;
+				};
+
+				partition@c8000 {
+					label = "database";
+					reg = <0x00c8000 0x1e40000>;
+					read-only;
+				};
+
+				partition@1f08000 {
+					label = "gps-assist";
+					reg = <0x1f08000 0x0004000>;
+					read-only;
+				};
+
+				partition@1f0c000 {
+					label = "tail";
+					reg = <0x1f0c000 0x00f4000>;
+					read-only;
+				};
+			};
+		};
+	};
+};
+
+/*
+ * Linux 6.1 has no S3C2410 pinctrl match data.  The S3C2412 GPIO register
+ * layout is compatible for the A-H banks used by SkyScout.
+ */
+&pinctrl_0 {
+	compatible = "samsung,s3c2412-pinctrl";
+
+	gpa: gpa-gpio-bank {
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	gpb: gpb-gpio-bank {
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	gpc: gpc-gpio-bank {
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	gpd: gpd-gpio-bank {
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	gpe: gpe-gpio-bank {
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	gpf: gpf-gpio-bank {
+		gpio-controller;
+		#gpio-cells = <2>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+	};
+
+	gpg: gpg-gpio-bank {
+		gpio-controller;
+		#gpio-cells = <2>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
+	};
+
+	gph: gph-gpio-bank {
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	gpj: gpj-gpio-bank {
+		gpio-controller;
+		#gpio-cells = <2>;
+	};
+
+	uart0_data: uart0-data-pins {
+		samsung,pins = "gph-0", "gph-1";
+		samsung,pin-function = <S3C2410_PIN_FUNC_2>;
+	};
+};
+
+&timer {
+	clocks = <&clocks PCLK_PWM>;
+	clock-names = "timers";
+	samsung,pwm-outputs = <0 1 2>;
+	status = "okay";
+};
+
+&uart_0 {
+	clocks = <&clocks PCLK_UART0>, <&clocks PCLK_UART0>;
+	clock-names = "uart", "clk_uart_baud0";
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart0_data>;
+	status = "okay";
+};
+
+&rtc {
+	clocks = <&clocks PCLK_RTC>;
+	clock-names = "rtc";
+	status = "okay";
+};
