@@ -1616,10 +1616,12 @@ static int s3cmci_probe(struct platform_device *pdev)
 	mmc->ops 	= &s3cmci_ops;
 	mmc->ocr_avail	= MMC_VDD_32_33 | MMC_VDD_33_34;
 #ifdef CONFIG_MMC_S3C_HW_SDIO_IRQ
-	mmc->caps	= MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
+	mmc->caps	= MMC_CAP_SDIO_IRQ;
 #else
-	mmc->caps	= MMC_CAP_4_BIT_DATA;
+	mmc->caps	= 0;
 #endif
+	if (host->pdata->bus_width != 1)
+		mmc->caps |= MMC_CAP_4_BIT_DATA;
 	mmc->f_min 	= host->clk_rate / (host->clk_div * 256);
 	mmc->f_max 	= host->clk_rate / host->clk_div;
 

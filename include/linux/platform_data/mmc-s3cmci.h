@@ -8,6 +8,8 @@
  * @no_detect: Set this if there is no detect switch.
  * @wprotect_invert: Invert the default sense of the write protect switch.
  * @use_dma: Set to allow the use of DMA.
+ * @bus_width: Maximum data bus width; zero preserves the historical 4-bit
+ *	default.
  * @gpio_detect: GPIO number for the card detect line.
  * @gpio_wprotect: GPIO number for the write protect line.
  * @ocr_avail: The mask of the available power states, non-zero to use.
@@ -31,6 +33,7 @@ struct s3c24xx_mci_pdata {
 	unsigned int	no_detect:1;
 	unsigned int	wprotect_invert:1;
 	unsigned int	use_dma:1;
+	unsigned int	bus_width;
 
 	unsigned long	ocr_avail;
 	void		(*set_power)(unsigned char power_mode,
