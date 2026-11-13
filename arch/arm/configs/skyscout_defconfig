@@ -19,7 +19,7 @@ CONFIG_CPU_S3C2410=y
 CONFIG_MACH_SKYSCOUT=y
 CONFIG_UNUSED_BOARD_FILES=y
 CONFIG_AEABI=y
-CONFIG_CMDLINE="earlycon keep_bootcon console=ttySAC0,9600n8 console=tty0 root=/dev/mmcblk0p2 rootwait ro"
+CONFIG_CMDLINE="earlycon console=ttySAC0,9600n8 console=tty0 root=/dev/mmcblk0p2 rootwait ro"
 CONFIG_CMDLINE_FORCE=y
 # CONFIG_BLK_DEV_INITRD is not set
 # CONFIG_MODULES is not set
